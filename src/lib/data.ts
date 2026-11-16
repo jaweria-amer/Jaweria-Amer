@@ -2087,5 +2087,6 @@ export const siteConfig = {
     { label: "Results", href: "/results" },
     { label: "Resources", href: "/resources" },
     { label: "About", href: "/about" },
+    { label: "FAQs", href: "/faq" },
   ],
 };

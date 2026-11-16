@@ -1,3 +1,4 @@
+import { AdmissionsFaqs } from "@/components/admissions-faqs";
 import { socialMetadata } from "@/lib/seo";
 import { notFound } from "next/navigation";
 import Link from "next/link";
@@ -95,6 +96,7 @@ export default async function CourseDetailPage({ params }: { params: Params }) {
       <div className="ed-paper border-t border-ink/10">
         <div className="ed-wrap grid gap-14 py-14 sm:py-20 lg:grid-cols-12 lg:gap-16">
           <div className="space-y-16 lg:col-span-8">
+            {course.id === "o-level-english-1123" && <AdmissionsFaqs />}
             <section aria-labelledby="outcomes-heading">
               <h2 id="outcomes-heading" className="ed-h2">What you will learn</h2>
               <ul className="mt-8 border-t border-ink/15">

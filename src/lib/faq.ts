@@ -1,12 +1,39 @@
 /**
- * FAQ content, kept word-for-word consistent with https://englishwithmissjay.com/faq and
- * class-timings. Edit here. The canonical YouTube channel is https://www.youtube.com/@englishwithmissjay.
+ * Shared public FAQ content. Programme claims are grounded in the published
+ * course material and the 5 November 2026 operations handbook. Edit here. The canonical YouTube channel is https://www.youtube.com/@englishwithmissjay.
  */
 export const YOUTUBE_CHANNEL_URL = "https://www.youtube.com/@englishwithmissjay";
 
+export interface FaqItem {
+  id?: string;
+  q: string;
+  a: string;
+}
+
+// The live LMS timetable publishes session times and examination-series labels,
+// not an approved next intake start date (checked 16 November 2026).
+// Update this single shared answer only when an actual batch start is confirmed.
+export const ADMISSIONS_FAQS: FaqItem[] = [
+  {
+    id: "next-batch",
+    q: "When does the next O Level English Language (1123) batch start?",
+    a: "The next O Level English Language (1123) batch start date is not yet confirmed here. The confirmed start date will appear here as soon as it is announced. The examination series shown in Class Timings is not a batch start date. Please enquire about the next intake and available seats.",
+  },
+  {
+    id: "homework",
+    q: "Will we receive homework and regular practice?",
+    a: "Yes. Students receive structured homework and exam-focused practice linked to the topics taught in class. This helps you apply each technique, strengthen your writing and build confidence before the examination. The assignments follow your batch’s teaching programme.",
+  },
+  {
+    id: "checked-work",
+    q: "Is homework checked, and will I know what to improve?",
+    a: "Yes. Submitted work is checked by authorised teaching staff, and students receive personalised, examiner-style feedback on what they have done well, where marks may be lost and what to improve next. Students view published feedback and any checked files in the LMS. Review and publication follow the teaching team’s checking process.",
+  },
+];
+
 export interface FaqGroup {
   title: string;
-  items: { q: string; a: string }[];
+  items: FaqItem[];
 }
 
 export const FAQ_GROUPS: FaqGroup[] = [
@@ -23,7 +50,7 @@ export const FAQ_GROUPS: FaqGroup[] = [
     title: "Registration",
     items: [
       { q: "How do I enrol?", a: "Use the Join the Next Batch form on this website, or contact Miss Jay on WhatsApp or by email to ask about available seats. Pricing and scheduling details are shared in that conversation. Sending the form is an enquiry, not a confirmed enrolment." },
-      { q: "When do new cohorts start?", a: "Cohorts are planned for the May/June 2027 examination series and the series that follow it. Whether a batch is open for enrolment is confirmed by Miss Jay, so message her on WhatsApp to check current availability." },
+      ADMISSIONS_FAQS[0],
       { q: "How much do the courses cost?", a: "Fees are discussed directly with Miss Jay. Message her on WhatsApp or send an email and she will share current pricing for the course you are interested in." },
       { q: "Can I join part-way through a programme?", a: "This depends on where the cohort is in the programme. Ask Miss Jay on WhatsApp whether joining part-way is possible for your course and intake." },
     ],
@@ -54,7 +81,9 @@ export const FAQ_GROUPS: FaqGroup[] = [
   {
     title: "Assignments and feedback",
     items: [
-      { q: "How do homework and writing feedback work?", a: "Students submit written work and receive annotated, examiner-style feedback with band-level commentary from Miss Jay." },
+      ADMISSIONS_FAQS[1],
+      ADMISSIONS_FAQS[2],
+      { q: "How do I submit homework?", a: "Enrolled students submit work through the task in their LMS account, following the instructions for that assignment. The submission method and any files required depend on the task." },
     ],
   },
   {

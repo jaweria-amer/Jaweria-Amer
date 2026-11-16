@@ -1,3 +1,4 @@
+import { AdmissionsFaqs } from "@/components/admissions-faqs";
 import type { Metadata } from "next";
 import Link from "next/link";
 import { listMarketingCourses } from "@/lib/course-offerings";
@@ -87,6 +88,12 @@ export default async function HomePage() {
 
       {/* M/J 2026 proof block — the results are the proof, so they sit straight after the hero */}
       <ResultsShowcase />
+
+      <section id="before-you-join" className="ed-paper scroll-mt-24 border-b border-ink/15">
+        <div className="ed-wrap py-14 sm:py-20">
+          <AdmissionsFaqs />
+        </div>
+      </section>
 
       {/* Who is Miss Jay — the teacher behind the results */}
       <section className="ed-paper">
