@@ -6,10 +6,13 @@
 data/
 
 # Scripts only used locally — except scripts/results/, whose privacy gate runs
-# as prebuild/postbuild on Vercel (a parent-excluded path cannot be re-included,
-# so exclude the children of scripts/ instead of the directory itself).
-scripts/*
-!scripts/results/
+# as prebuild/postbuild on Vercel. `vercel deploy` (CLI) does not honour a
+# `scripts/*` + `!scripts/results/` re-include, which uploaded a bundle without
+# the gate and failed the build, so exclude by file type instead.
+scripts/*.ts
+scripts/*.js
+scripts/*.mjs
+scripts/source/
 
 # Nested project copy (safety net — also in .gitignore)
 jaweria-amer/

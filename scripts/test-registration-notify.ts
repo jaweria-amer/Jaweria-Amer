@@ -153,7 +153,7 @@ async function main() {
     assert(!/[\r\n]/.test(String(sent.body.subject)));
     const attachments = sent.body.attachments as { filename: string; content: string }[];
     assert.equal(attachments.length, 1);
-    assert.match(attachments[0].filename, /^enquiries-\d{4}-\d{2}-\d{2}\.xlsx$/);
+    assert.equal(attachments[0].filename, "jaweria-amer-enquiries.xlsx", "one stable workbook name");
 
     // 3b. The notice recaps earlier enquiries, so a missed notice surfaces with the next one,
     //     and the provider's message id is logged against the enquiry's request id.
@@ -242,7 +242,15 @@ async function main() {
     assert(sheet.includes("Needs review"));
     // Phone column: header between Email and Course, value stored as text with the + intact,
     // historical NULL left blank, and a "Text" (@) format on the column.
-    assert.deepEqual([...ENQUIRY_HEADERS].slice(0, 4), ["Name", "Email", "Phone / WhatsApp", "Course"]);
+    assert.deepEqual(
+      [...ENQUIRY_HEADERS],
+      ["Name", "Email", "Phone", "Course", "Batch Preference", "Date Submitted", "Status"],
+      "the seven staff columns, in order",
+    );
+    assert(sheet.includes('<autoFilter ref="A1:G3"/>'), "header autofilter covers the data rows");
+    assert(parts["xl/workbook.xml"].includes('name="Enquiries"') && parts["xl/workbook.xml"].includes("_xlnm._FilterDatabase"));
+    assert(sheet.includes('<pane ySplit="1"'), "frozen header row");
+    assert(sheet.includes("2026-11-01 14:00 PKT") && sheet.includes("2026-11-02 14:00 PKT"), "explicit, deterministic PKT dates (UTC+5)");
     assert.equal(ENQUIRY_HEADERS.length, 7);
     assert(sheet.includes('<c r="C2" t="inlineStr" s="2"><is><t xml:space="preserve">+442079460958</t>'), "phone is an inline text cell");
     assert(sheet.includes('<c r="C3" t="inlineStr" s="2"><is><t xml:space="preserve"></t>'), "historical NULL phone is blank");
@@ -300,7 +308,7 @@ async function main() {
       "xl/worksheets/sheet1.xml"
     ];
     assert(cappedSheet.includes(INCOMPLETE_NOTICE));
-    assert.match(enquiryFilename(new Date("2026-11-11"), false), /latest-200/);
+    assert.match(enquiryFilename(false), /latest-200/);
     globalThis.fetch = async (url) =>
       String(url).includes("_page")
         ? Response.json({ code: "PGRST202" }, { status: 404 })
@@ -338,6 +346,34 @@ async function main() {
     assert(migration.includes("list_registration_interest_page") && migration.includes("claim_registration_notifications"));
     assert(!/drop (table|column)|delete from registration_private\.leads/i.test(migration), "migration is additive");
 
+    // 11f. Master workbook: one row per canonical enquiry, Unicode intact, a newly saved
+    //      enquiry appears in the very next export, and a historical NULL phone is blank.
+    {
+      const rowsOf = (book: Buffer) =>
+        [...unzip(book)["xl/worksheets/sheet1.xml"].matchAll(/<row r="(\d+)">(.*?)<\/row>/g)].map((m) =>
+          [...m[2].matchAll(/<t xml:space="preserve">(.*?)<\/t>/g)].map((c) => c[1]),
+        );
+      const base = [
+        { ...stored[0], id: "u1", name: "Zoë Müller 张伟 عائشة", phone: null, batch_letter: null },
+        { ...stored[1], id: "u2", name: "Second Person", phone: "+442079460958" },
+      ];
+      const first = rowsOf(enquiriesToXlsx(base));
+      assert.equal(first.length, 3);
+      assert.deepEqual(first[0], ["Name", "Email", "Phone", "Course", "Batch Preference", "Date Submitted", "Status"]);
+      assert(first.some((r) => r[0] === "Zoë Müller 张伟 عائشة" && r[2] === "" && r[4] === ""), "unicode name, blank phone and batch");
+      assert(first.some((r) => r[0] === "Second Person" && r[2] === "+442079460958" && r[4] === "Batch A"));
+      const withNew = rowsOf(
+        enquiriesToXlsx([...base, { ...stored[1], id: "u3", name: "Brand New", phone: "+923001234567", created_at: "2026-11-14T10:00:00Z" }]),
+      );
+      assert.equal(withNew.length, 4, "a new enquiry appears in the next export with no manual step");
+      assert.equal(withNew.filter((r) => r[0] === "Brand New").length, 1, "exactly once");
+      assert.equal(withNew[3][5], "2026-11-14 15:00 PKT");
+      const injected = rowsOf(enquiriesToXlsx([{ ...base[1], name: "@SUM(A1)", email: "-cmd@example.com", id: "u4" }]));
+      assert.equal(injected[1][0], "&apos;@SUM(A1)".replace("&apos;", "'"));
+      assert.equal(injected[1][1], "'-cmd@example.com");
+      assert.equal(enquiryFilename(true), "jaweria-amer-enquiries.xlsx");
+    }
+
     // 11e. Durable path: the protected claim returns the phone and the email carries it.
     {
       reset();
@@ -371,6 +407,10 @@ async function main() {
     assert.equal(denied.status, 401);
     assert.equal(denied.headers.get("cache-control"), "no-store, private");
     assert(!(await denied.text()).includes("example.com"));
+    const exportSource = readFileSync("src/app/api/admin/registrations/export/route.ts", "utf8");
+    assert(exportSource.includes("session.authenticated") && exportSource.includes("listAllRegistrations"), "export is generated live from the database behind the admin session");
+    assert(exportSource.includes("spreadsheetml.sheet") && exportSource.includes("attachment; filename=") && exportSource.includes("no-store, private"));
+    assert(!/trackEvent|gtag|analytics/i.test(exportSource), "no analytics on the export");
 
     // 12b. Form, admin inbox and privacy wiring for the phone number.
     const form = readFileSync("src/components/public-experience/registration-form.tsx", "utf8");
