@@ -83,7 +83,7 @@ export function notificationConfig() {
 
 const RECAP_COUNT = 5;
 
-async function loadReport(requestId: string, createdAt: Date) {
+async function loadReport(requestId: string) {
   try {
     const { leads, complete } = await listAllRegistrations();
     const sheet = enquiriesToXlsx(leads, { complete });
@@ -155,10 +155,7 @@ async function sendEnquiryNotice(
   // Claim before the first await so two overlapping calls cannot both send.
   remember(requestId);
 
-  const { attachments, earlier, complete, total } = await loadReport(
-    requestId,
-    createdAt,
-  );
+  const { attachments, earlier, complete, total } = await loadReport(requestId);
   const body = JSON.stringify({
     from,
     to: [to],
