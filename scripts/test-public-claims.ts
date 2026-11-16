@@ -1,6 +1,7 @@
 import assert from "node:assert/strict";
 import { readdirSync, readFileSync, statSync } from "node:fs";
 import { join } from "node:path";
+import { ADMISSIONS_FAQS, FAQ_GROUPS } from "../src/lib/faq";
 import { socialMetadata } from "../src/lib/seo";
 import {
   getBatchAnnouncement,
@@ -59,5 +60,15 @@ assert.equal(
   4,
   "footer help link list changed shape; update this guard",
 );
+
+// Admissions answers occur once in the full FAQ and stay shared across entry points.
+const allQuestions = FAQ_GROUPS.flatMap((group) => group.items);
+assert.equal(new Set(allQuestions.map((item) => item.q)).size, allQuestions.length);
+for (const item of ADMISSIONS_FAQS) {
+  assert.equal(allQuestions.filter((question) => question === item).length, 1);
+  assert(item.id);
+}
+assert.match(ADMISSIONS_FAQS[0].a, /not yet confirmed/);
+assert(!/from Miss Jay|personally|24 hours|immediate/i.test(ADMISSIONS_FAQS[2].a));
 
 console.log("public claims tests passed");

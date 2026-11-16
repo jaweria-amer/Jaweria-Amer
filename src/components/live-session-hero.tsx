@@ -120,6 +120,10 @@ export function LiveSessionHero({
           >
             Share your interest. No Google sign-in required.
           </p>
+          <Link href="#before-you-join" className="ed-link mt-4 text-crimson">
+            Start date, homework &amp; feedback
+            <Arrow direction="down" />
+          </Link>
         </div>
 
         {/* Portrait stage — one of the two surfaces allowed to tilt. */}
@@ -129,14 +133,6 @@ export function LiveSessionHero({
             data-depth="tilt"
             style={{ ["--d" as string]: "0.2s" }}
           >
-            <div
-              className="absolute inset-x-0 bottom-0 top-[8%] rounded-t-[999px] bg-crimson"
-              style={{
-                backgroundImage:
-                  "radial-gradient(120% 80% at 50% 12%, rgba(255,196,186,0.34), transparent 60%)",
-              }}
-              aria-hidden
-            />
             <div className="ed-stage-figure absolute inset-x-[4%] bottom-0 top-[8%] overflow-hidden rounded-t-[999px] bg-white">
               {/* The supplied photo is square with a white background, so it is
                   shown whole (never cropped or upscaled) inside a white arch.
