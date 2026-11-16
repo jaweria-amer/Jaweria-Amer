@@ -83,7 +83,7 @@ export function notificationConfig() {
 
 const RECAP_COUNT = 5;
 
-async function loadReport(requestId: string, createdAt: Date) {
+async function loadReport(requestId: string) {
   try {
     const { leads, complete } = await listAllRegistrations();
     const sheet = enquiriesToXlsx(leads, { complete });
@@ -92,7 +92,7 @@ async function loadReport(requestId: string, createdAt: Date) {
         ? []
         : [
             {
-              filename: enquiryFilename(createdAt, complete),
+              filename: enquiryFilename(complete),
               content: sheet.toString("base64"),
             },
           ];
@@ -155,10 +155,7 @@ async function sendEnquiryNotice(
   // Claim before the first await so two overlapping calls cannot both send.
   remember(requestId);
 
-  const { attachments, earlier, complete, total } = await loadReport(
-    requestId,
-    createdAt,
-  );
+  const { attachments, earlier, complete, total } = await loadReport(requestId);
   const body = JSON.stringify({
     from,
     to: [to],
@@ -386,7 +383,7 @@ export async function sendHistoricalWorkbook(): Promise<HistoricalResult | { err
           html:
             `<p>This is the complete list of enquiries saved by the website so far: <b>${leads.length}</b>, oldest first.</p>` +
             `<p>From now on you will receive an email for each new enquiry, with this sheet updated and attached.</p>`,
-          attachments: [{ filename: enquiryFilename(new Date(), complete), content: sheet.toString("base64") }],
+          attachments: [{ filename: enquiryFilename(complete), content: sheet.toString("base64") }],
         }),
       },
       30_000,

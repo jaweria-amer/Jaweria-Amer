@@ -5,10 +5,10 @@ import type { RegistrationLead } from "./server";
 export const ENQUIRY_HEADERS = [
   "Name",
   "Email",
-  "Phone / WhatsApp",
+  "Phone",
   "Course",
-  "Batch preference",
-  "Date submitted (PKT)",
+  "Batch Preference",
+  "Date Submitted",
   "Status",
 ] as const;
 
@@ -27,14 +27,15 @@ export function enquiryStatus(routingStatus: string) {
   }
 }
 
+/**
+ * Deterministic staff-facing timestamp: "2026-11-13 21:51 PKT". Pakistan has no
+ * daylight saving (UTC+5 year-round), so a fixed offset is exact, and the
+ * year-first layout sorts correctly as text.
+ */
 export function formatPkt(iso: string) {
-  return (
-    new Date(iso).toLocaleString("en-GB", {
-      timeZone: "Asia/Karachi",
-      dateStyle: "medium",
-      timeStyle: "short",
-    }) + " PKT"
-  );
+  const ms = Date.parse(iso);
+  if (Number.isNaN(ms)) return "";
+  return `${new Date(ms + 5 * 3_600_000).toISOString().slice(0, 16).replace("T", " ")} PKT`;
 }
 
 /** Spreadsheet formulas in user-supplied text are neutralised (CSV/Excel injection). */
@@ -75,9 +76,12 @@ export function enquiriesToXlsx(
   ];
   // Never let a capped list pass as the full history.
   if (options.complete === false) rows.push([INCOMPLETE_NOTICE, "", "", "", "", "", ""]);
-  return buildXlsx(rows, [26, 34, 22, 44, 16, 26, 36], "Enquiries", [PHONE_COLUMN]);
+  return buildXlsx(rows, [26, 34, 22, 44, 18, 22, 36], "Enquiries", [PHONE_COLUMN], leads.length + 1);
 }
 
-export function enquiryFilename(now = new Date(), complete = true) {
-  return `enquiries-${complete ? "" : "latest-200-"}${now.toISOString().slice(0, 10)}.xlsx`;
+/** One stable name: staff always download the same single master workbook. */
+export const ENQUIRY_FILENAME = "jaweria-amer-enquiries.xlsx";
+
+export function enquiryFilename(complete = true) {
+  return complete ? ENQUIRY_FILENAME : ENQUIRY_FILENAME.replace(".xlsx", "-latest-200.xlsx");
 }

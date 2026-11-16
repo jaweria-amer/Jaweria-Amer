@@ -59,7 +59,7 @@ export default async function RegistrationsPage() {
         href="/api/admin/registrations/export"
         className="mt-4 inline-flex min-h-11 items-center rounded-lg bg-crimson px-4 text-sm font-semibold text-white hover:bg-crimson-dark focus-visible:outline-2 focus-visible:outline-offset-2 focus-visible:outline-crimson"
       >
-        Download Excel sheet
+        Download All Enquiries (Excel)
       </a>
       <div className="mt-6 space-y-4">
         {leads.length ? (

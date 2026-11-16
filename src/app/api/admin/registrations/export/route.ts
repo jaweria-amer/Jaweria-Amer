@@ -33,7 +33,7 @@ export async function GET() {
         ...PRIVATE_HEADERS,
         "Content-Type":
           "application/vnd.openxmlformats-officedocument.spreadsheetml.sheet",
-        "Content-Disposition": `attachment; filename="${enquiryFilename(new Date(), complete)}"`,
+        "Content-Disposition": `attachment; filename="${enquiryFilename(complete)}"`,
         "X-Enquiries-Complete": String(complete),
       },
     });
